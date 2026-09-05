@@ -9,10 +9,7 @@ that profile, and emails a digest of genuinely new matches. For each match it
 prepares an application email — which sits in a drafts queue until the user
 reads it, edits it, attaches their resume, and presses Send themselves.
 
-> **Naming note:** the repository, Worker and package are still called
-> `linkedin-job-matcher`. Renaming them to `rolecall` is a config-level change
-> (`package.json`, `wrangler.toml`, the brand string in `src/ui.ts`) that has
-> not been applied yet.
+> **Live at** https://rolecall.pnil7877.workers.dev
 >
 > Alternatives considered: **Shortlist** (describes the output, but generic) and
 > **Matchbox** (match + mailbox, memorable, but collides with a well-known toy
@@ -84,7 +81,7 @@ Three commitments follow from that design:
 ### Job sources — many boards, one search
 
 RoleCall queries the [JSearch API](https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch),
-which aggregates listings surfaced through Google for Jobs. One search reaches
+which wraps Google for Jobs. One search reaches
 many boards at once. A single live 10-result query for *"software engineer in
 Ahmedabad"* returned postings from **six distinct boards**:
 

@@ -1,4 +1,4 @@
-# LinkedIn Job Matcher
+# RoleCall
 
 A multi-user job tracker. Each person registers, sets their own job profile, and
 gets a daily digest of matching roles plus ready-to-edit application drafts —
@@ -87,7 +87,7 @@ npm run deploy
 
 ### 6. Register
 
-Visit `https://<your-worker>.<your-subdomain>.workers.dev/signup`, enter your
+Visit `https://rolecall.<your-subdomain>.workers.dev/signup`, enter your
 invite code, and create the first account. Share the URL and the code with
 anyone else you want to let in.
 

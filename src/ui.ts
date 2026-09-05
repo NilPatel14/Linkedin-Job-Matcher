@@ -229,7 +229,7 @@ function nav(user: NavUser, active: string, draftCount?: number): string {
   return `
   <nav class="nav">
     <div class="nav-inner">
-      <a class="brand" href="/profile"><span class="dot">&#9679;</span> Job Matcher</a>
+      <a class="brand" href="/profile"><span class="dot">&#9679;</span> RoleCall</a>
       <div class="nav-links">
         ${link("/profile", "profile", "Profile")}
         ${link("/drafts", "drafts", `Drafts ${count}`)}
@@ -364,7 +364,7 @@ function authShell(title: string, inner: string): string {
 
 export function renderLogin(opts: { error?: string; notice?: string; email?: string } = {}): string {
   return authShell(
-    "Sign in — Job Matcher",
+    "Sign in — RoleCall",
     `
       <h1>Welcome back</h1>
       <p class="sub">Sign in to your job matcher</p>
@@ -388,7 +388,7 @@ export function renderLogin(opts: { error?: string; notice?: string; email?: str
 
 export function renderSignup(opts: { error?: string; email?: string } = {}): string {
   return authShell(
-    "Register — Job Matcher",
+    "Register — RoleCall",
     `
       <h1>Create your account</h1>
       <p class="sub">You need an invite code from whoever runs this instance</p>
@@ -509,7 +509,7 @@ export function renderSettings(
   }`;
 
   return layout({
-    title: "Mail setup — Job Matcher",
+    title: "Mail setup — RoleCall",
     user,
     active: "settings",
     heading: "Mail setup",
@@ -643,7 +643,7 @@ export function renderProfileForm(
   ${renderResumePanel(opts.resume ?? null)}`;
 
   return layout({
-    title: "Profile — Job Matcher",
+    title: "Profile — RoleCall",
     user,
     active: "profile",
     heading: "Profile",
@@ -735,7 +735,7 @@ export function renderDraftsPage(
        </div>`;
 
   return layout({
-    title: "Drafts — Job Matcher",
+    title: "Drafts — RoleCall",
     user,
     active: "drafts",
     heading: "Application drafts",

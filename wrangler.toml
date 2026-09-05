@@ -1,4 +1,4 @@
-name = "linkedin-job-matcher"
+name = "rolecall"
 main = "src/index.ts"
 compatibility_date = "2024-09-01"
 compatibility_flags = ["nodejs_compat"]
@@ -20,7 +20,7 @@ id = "5599d2a1e7cf49bbab6364ee9c225bf0"
 #   ENCRYPTION_KEY - master secret encrypting each user's SMTP password at rest.
 #                    Generate with: openssl rand -base64 32
 #                    Changing it renders every stored mail password unreadable.
-#   PUBLIC_URL     - optional, e.g. https://linkedin-job-matcher.you.workers.dev
+#   PUBLIC_URL     - optional, e.g. https://rolecall.you.workers.dev
 #                    (lets digest emails link to the drafts page)
 #
 # Each user supplies their own SMTP host/username/app password in the app,

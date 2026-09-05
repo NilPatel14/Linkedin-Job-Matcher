@@ -401,7 +401,7 @@ export default {
         await sendMail(await toSmtpConfig(env, settings), {
           from: settings.mailFrom,
           to: settings.notifyEmail,
-          subject: "Job Matcher test email",
+          subject: "RoleCall test email",
           body: buildDigestHtml(sample, env.PUBLIC_URL),
         });
       } catch (e) {

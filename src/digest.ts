@@ -48,6 +48,6 @@ export function buildDigestHtml(matches: MatchedJob[], publicUrl?: string): stri
              </p>`
           : ""
       }
-      <p style="color:#999;font-size:12px;margin-top:20px;">Sent by your LinkedIn Job Matcher.</p>
+      <p style="color:#999;font-size:12px;margin-top:20px;">Sent by RoleCall.</p>
     </div>`;
 }
