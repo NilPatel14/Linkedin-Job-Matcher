@@ -1,0 +1,27 @@
+name = "linkedin-job-matcher"
+main = "src/index.ts"
+compatibility_date = "2024-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Runs once a day at 07:00 UTC, for every registered user. Edit to taste.
+[triggers]
+crons = ["0 7 * * *"]
+
+# Create with: wrangler kv namespace create JOBS_KV
+# then paste the returned id below.
+[[kv_namespaces]]
+binding = "JOBS_KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# Secrets (never put these here) - set with `wrangler secret put <NAME>`:
+#   RAPIDAPI_KEY   - key for the JSearch API on RapidAPI. Shared by every user,
+#                    so watch the monthly quota as you add people.
+#   INVITE_CODE    - required to register. Rotate it to stop new signups.
+#   ENCRYPTION_KEY - master secret encrypting each user's SMTP password at rest.
+#                    Generate with: openssl rand -base64 32
+#                    Changing it renders every stored mail password unreadable.
+#   PUBLIC_URL     - optional, e.g. https://linkedin-job-matcher.you.workers.dev
+#                    (lets digest emails link to the drafts page)
+#
+# Each user supplies their own SMTP host/username/app password in the app,
+# under "Mail setup" - those are per-user data in KV, not Worker secrets.

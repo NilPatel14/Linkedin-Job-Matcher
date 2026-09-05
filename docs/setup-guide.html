@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Matcher Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --ground: #f4f7fa;
+    --surface: #ffffff;
+    --surface-sunk: #eef2f7;
+    --line: #dbe3ec;
+    --line-strong: #c2cfdd;
+    --ink: #101c2e;
+    --ink-soft: #3d4f66;
+    --muted: #5f7086;
+    --accent: #0a5fb4;
+    --accent-ink: #084c91;
+    --accent-wash: #e6eff9;
+    --warn: #9a5406;
+    --warn-wash: #fdf3e4;
+    --warn-line: #efd3a8;
+    --ok: #0d6844;
+    --ok-wash: #e7f4ed;
+    --ok-line: #b3ddc7;
+
+    --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --body: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0c1420;
+      --surface: #131f30;
+      --surface-sunk: #0f1927;
+      --line: #24344a;
+      --line-strong: #33475f;
+      --ink: #e7edf5;
+      --ink-soft: #b6c4d5;
+      --muted: #8598ad;
+      --accent: #6aa9ea;
+      --accent-ink: #8dc0f4;
+      --accent-wash: #16283f;
+      --warn: #e9b171;
+      --warn-wash: #2a1f10;
+      --warn-line: #5c421f;
+      --ok: #7fcea6;
+      --ok-wash: #0f2a1e;
+      --ok-line: #275c41;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0c1420;
+    --surface: #131f30;
+    --surface-sunk: #0f1927;
+    --line: #24344a;
+    --line-strong: #33475f;
+    --ink: #e7edf5;
+    --ink-soft: #b6c4d5;
+    --muted: #8598ad;
+    --accent: #6aa9ea;
+    --accent-ink: #8dc0f4;
+    --accent-wash: #16283f;
+    --warn: #e9b171;
+    --warn-wash: #2a1f10;
+    --warn-line: #5c421f;
+    --ok: #7fcea6;
+    --ok-wash: #0f2a1e;
+    --ok-line: #275c41;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.6;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sheet {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 22px; margin-bottom: 34px; }
+  .eyebrow {
+    font-family: var(--display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(30px, 5.4vw, 42px);
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    text-wrap: balance;
+    margin: 0 0 12px;
+  }
+  .standfirst { font-size: 18px; color: var(--ink-soft); margin: 0; max-width: 60ch; }
+
+  /* ---------- prerequisites ---------- */
+  .prereq {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 46px;
+  }
+  .prereq h2 {
+    font-family: var(--display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+  .prereq ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+  .prereq li { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: start; font-size: 16px; }
+  .tick { color: var(--accent); font-weight: 700; font-family: var(--display); line-height: 1.5; }
+  .prereq strong { font-weight: 600; }
+
+  /* ---------- steps ---------- */
+  .step { display: grid; grid-template-columns: 52px 1fr; gap: 20px; margin-bottom: 44px; }
+  .num {
+    font-family: var(--display);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent);
+    background: var(--accent-wash);
+    border-radius: 999px;
+    width: 38px; height: 38px;
+    display: grid; place-items: center;
+    margin-top: 2px;
+  }
+  .step-body { min-width: 0; }
+  .step h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -.01em;
+    line-height: 1.25;
+    margin: 4px 0 10px;
+    text-wrap: balance;
+  }
+  .step p { margin: 0 0 12px; max-width: 62ch; }
+  .step p:last-child { margin-bottom: 0; }
+  .step ul { margin: 0 0 12px; padding-left: 20px; max-width: 62ch; }
+  .step li { margin-bottom: 6px; }
+
+  code {
+    font-family: var(--mono);
+    font-size: .87em;
+    background: var(--surface-sunk);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 5px;
+    word-break: break-word;
+  }
+
+  /* ---------- literal values to type ---------- */
+  .fields {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 16px 18px;
+    margin: 0 0 14px;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px 20px;
+    font-size: 15px;
+  }
+  .fields dt { color: var(--muted); font-weight: 600; }
+  .fields dd { margin: 0; font-family: var(--mono); font-size: 14px; color: var(--ink); }
+  .fields dd em { font-family: var(--body); font-style: normal; color: var(--muted); font-size: 14px; }
+
+  /* ---------- flagged notes ---------- */
+  .note {
+    border-left: 3px solid var(--warn-line);
+    background: var(--warn-wash);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    margin: 0 0 14px;
+    font-size: 15.5px;
+    color: var(--warn);
+    max-width: 62ch;
+  }
+  .note strong { color: var(--warn); font-weight: 600; }
+  .note.good { border-left-color: var(--ok-line); background: var(--ok-wash); color: var(--ok); }
+  .note.good strong { color: var(--ok); }
+
+  /* ---------- reference sections ---------- */
+  .rule { border: 0; border-top: 1px solid var(--line-strong); margin: 56px 0 34px; }
+  .section-head {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: -.01em;
+    margin: 0 0 8px;
+  }
+  .section-lede { color: var(--ink-soft); margin: 0 0 20px; max-width: 62ch; }
+
+  .table-scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 15.5px; min-width: 420px; }
+  th, td { text-align: left; padding: 10px 14px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th {
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  td.pts { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--accent); font-weight: 500; }
+
+  .facts { display: grid; gap: 0; margin: 0; }
+  .facts div {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 18px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 15.5px;
+  }
+  .facts dt { color: var(--muted); font-weight: 600; }
+  .facts dd { margin: 0; color: var(--ink-soft); }
+
+  details {
+    border-bottom: 1px solid var(--line);
+    padding: 12px 0;
+  }
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-family: var(--display);
+    font-size: 16px;
+    list-style: none;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before {
+    content: "›";
+    color: var(--accent);
+    font-size: 18px;
+    transition: transform .15s ease;
+    display: inline-block;
+  }
+  details[open] summary::before { transform: rotate(90deg); }
+  details p { margin: 10px 0 2px 24px; color: var(--ink-soft); font-size: 15.5px; max-width: 58ch; }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  @media (max-width: 560px) {
+    .sheet { padding: 34px 18px 72px; }
+    .step { grid-template-columns: 40px 1fr; gap: 14px; }
+    .num { width: 32px; height: 32px; font-size: 13px; }
+    .fields { grid-template-columns: 1fr; gap: 3px 0; }
+    .fields dt { margin-top: 8px; }
+    .facts div { grid-template-columns: 1fr; gap: 2px; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header class="masthead">
+    <p class="eyebrow">Job Matcher</p>
+    <h1>Set up and send your first application</h1>
+    <p class="standfirst">Eight steps, about fifteen minutes. At the end you'll have a daily job digest arriving by email and your first application sent — with your resume attached, from your own address.</p>
+  </header>
+
+  <section class="prereq">
+    <h2>Before you start</h2>
+    <ul>
+      <li><span class="tick">1</span><span><strong>The site address and an invite code.</strong> Both come from whoever runs this instance. You can't register without the code.</span></li>
+      <li><span class="tick">2</span><span><strong>A Gmail account with 2-Step Verification on.</strong> Any mail provider works, but Gmail is the path of least resistance and 2FA is required for what comes next.</span></li>
+      <li><span class="tick">3</span><span><strong>Your resume as a PDF</strong>, under 5&nbsp;MB.</span></li>
+    </ul>
+  </section>
+
+  <section class="step">
+    <div class="num">1</div>
+    <div class="step-body">
+      <h2>Create your account</h2>
+      <p>Go to <code>/signup</code> on the site address you were given. Enter your email, a password of at least 8 characters, and the invite code.</p>
+      <p>You'll land straight on the <strong>Mail setup</strong> page, because nothing can be sent until that's done.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="num">2</div>
+    <div class="step-body">
+      <h2>Create a Gmail app password</h2>
+      <p>Job Matcher sends mail as you, so it needs its own password for your mail account — not your real one.</p>
+      <p>With 2-Step Verification switched on, visit <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">Google App Passwords</a>, create one, and copy the 16 characters.</p>
+      <div class="note">
+        <strong>Your normal Google password will not work here.</strong> If App Passwords isn't offered as an option, 2-Step Verification isn't fully enabled yet — turn it on and come back.
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="num">3</div>
+    <div class="step-body">
+      <h2>Connect your mail account</h2>
+      <p>On <strong>Mail setup</strong>, fill in these values:</p>
+      <dl class="fields">
+        <dt>SMTP host</dt><dd>smtp.gmail.com</dd>
+        <dt>Port</dt><dd>587</dd>
+        <dt>Implicit TLS</dt><dd><em>leave unticked</em></dd>
+        <dt>SMTP username</dt><dd>you@gmail.com</dd>
+        <dt>App password</dt><dd><em>the 16 characters, no spaces</em></dd>
+        <dt>Send from</dt><dd>you@gmail.com</dd>
+        <dt>Send digests to</dt><dd>you@gmail.com</dd>
+      </dl>
+      <p>Google shows the app password in four groups of four. Type it as one unbroken string.</p>
+      <div class="note">
+        <strong>Send from must match the SMTP username exactly.</strong> Gmail refuses to send mail claiming to be from an address you haven't authenticated as.
+      </div>
+      <div class="note good">
+        <strong>Your app password is encrypted before it's stored</strong>, and the page will never show it back to you. To change it later, type a new one; leave the field blank to keep the existing one.
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="num">4</div>
+    <div class="step-body">
+      <h2>Send a test email</h2>
+      <p>Once the settings are saved, a <strong>Send test email</strong> button appears. Press it and check your inbox — and your spam folder.</p>
+      <p>Do this now rather than later. If something is wrong with your credentials, you want to find out here, not halfway through applying for a job.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="num">5</div>
+    <div class="step-body">
+      <h2>Fill in your profile</h2>
+      <p>The <strong>Profile</strong> page has two halves. The first decides which jobs get found:</p>
+      <ul>
+        <li><strong>Desired job titles</strong> — what you'd type into a job site. Each title costs one API request per search, so start with one or two.</li>
+        <li><strong>Skills</strong> — these drive your match score, so list what you'd genuinely claim in an interview.</li>
+        <li><strong>Preferred locations</strong>, <strong>exclude keywords</strong>, <strong>employment types</strong>, <strong>minimum score</strong>, and how far back to search.</li>
+      </ul>
+      <p>The second half — name, headline, pitch, links — is what gets written into your application drafts, word for word.</p>
+      <div class="note">
+        <strong>Only your first location is actually searched.</strong> The rest still affect your match score, but they don't widen the net. If you want results from a second city, that's a second search.
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="num">6</div>
+    <div class="step-body">
+      <h2>Upload your resume</h2>
+      <p>At the bottom of the Profile page, upload your resume once — PDF or Word, up to 5&nbsp;MB. Every application draft from then on offers to attach it with a single tick, already ticked.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="num">7</div>
+    <div class="step-body">
+      <h2>Run your first search</h2>
+      <p>Press <strong>Run search</strong> in the top bar. It runs immediately instead of waiting for tomorrow's scheduled run, then drops you on the <strong>Drafts</strong> page with a summary of what it found.</p>
+      <p>Nothing found? Widen <em>Posted within</em> to <code>month</code>, lower your minimum score, or use a broader job title. A quiet result usually means the filters are tight, not that the market is empty.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="num">8</div>
+    <div class="step-body">
+      <h2>Send an application</h2>
+      <p>Each match arrives as a prepared draft. Click one to open it, then:</p>
+      <ul>
+        <li>Put the recruiter's address in <strong>To</strong>. You have to find this yourself — job listings almost never include it, so check the posting or the company's site.</li>
+        <li>Edit the subject and body. They're a starting point, not a finished letter.</li>
+        <li>Confirm your resume is ticked under <strong>Attachments</strong>, and add a cover letter there if you have one.</li>
+        <li>Press <strong>Send application</strong>.</li>
+      </ul>
+      <div class="note good">
+        <strong>Nothing reaches a recruiter automatically.</strong> The daily run only ever emails you. A draft sits untouched until you personally press Send on it.
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2 class="section-head">How your match score works</h2>
+    <p class="section-lede">Every job is scored out of 100. Anything at or above your minimum score becomes a draft.</p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Signal</th><th>Points</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Job title contains one of your desired titles</td><td class="pts">40</td></tr>
+          <tr><td>Your skills appear in the title or description</td><td class="pts">up to 40</td></tr>
+          <tr><td>Location matches, or the job is remote</td><td class="pts">20</td></tr>
+          <tr><td>An excluded keyword appears anywhere</td><td class="pts">score → 0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="section-lede" style="margin-top:18px;">Because location is only worth 20, a strong title-and-skills match in the wrong city still scores 80 and gets through. If you want location to be close to mandatory, set your minimum score above 80.</p>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2 class="section-head">Worth knowing</h2>
+    <dl class="facts">
+      <div><dt>Daily digest</dt><dd>Runs once a day at 07:00 UTC and emails you only if something new turned up.</dd></div>
+      <div><dt>Repeat matches</dt><dd>A job you've already been told about won't be sent again.</dd></div>
+      <div><dt>Draft lifespan</dt><dd>Drafts are kept for 30 days, then cleared automatically.</dd></div>
+      <div><dt>Attachment limit</dt><dd>5 MB for your stored resume; 10 MB total per email.</dd></div>
+      <div><dt>Drafts are templates</dt><dd>Nothing is AI-written. Every sentence comes from text you wrote in your profile, so the email can't invent experience you don't have.</dd></div>
+      <div><dt>Your data</dt><dd>Your profile, drafts and resume are yours alone — no other user can see them.</dd></div>
+    </dl>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2 class="section-head">If something goes wrong</h2>
+    <details>
+      <summary>“Username and Password not accepted”</summary>
+      <p>The app password is wrong, or 2-Step Verification isn't actually switched on. Generate a fresh app password and retype it without spaces.</p>
+    </details>
+    <details>
+      <summary>The test email never arrives</summary>
+      <p>Check spam first. If it's genuinely missing, confirm <strong>Send from</strong> is identical to your SMTP username — a mismatch is the usual cause.</p>
+    </details>
+    <details>
+      <summary>The search finds nothing</summary>
+      <p>Widen <em>Posted within</em> to <code>month</code>, drop your minimum score, or try a broader job title. Recent postings for a narrow title in one city can genuinely be zero.</p>
+    </details>
+    <details>
+      <summary>A send fails partway through</summary>
+      <p>Your edits are saved before delivery is attempted, so nothing you typed is lost. Fix the problem and press Send again.</p>
+    </details>
+    <details>
+      <summary>“Set up your mail account first”</summary>
+      <p>You haven't finished Mail setup, or the saved credentials were removed. Go back to step 3.</p>
+    </details>
+  </section>
+
+  <footer>
+    Job Matcher runs on your own invite-only instance. Applications are sent from your mail account, never a shared one.
+  </footer>
+
+</div>
+</body>
+</html>
