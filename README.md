@@ -190,3 +190,7 @@ location to be effectively mandatory, set `minScore` above 80.
   user their own digest; application drafts sit at `/drafts` until sent by hand.
 - The cron iterates every registered user. One user's failure is logged and
   skipped rather than aborting the run.
+
+## Licence
+
+Released under the [MIT Licence](LICENSE) — © 2026 Nil Patel.
