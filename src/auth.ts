@@ -1,5 +1,5 @@
 import { Env, User } from "./types";
-import { hashPassword, randomToken, safeEqual } from "./crypto";
+import { hashClientKey, randomToken, safeEqual } from "./crypto";
 
 const SESSION_TTL = 30 * 24 * 60 * 60;
 const COOKIE = "jm_session";
@@ -28,9 +28,9 @@ export async function listUsers(env: Env): Promise<User[]> {
   return raw.filter((r): r is string => r !== null).map((r) => JSON.parse(r) as User);
 }
 
-export async function createUser(env: Env, email: string, password: string): Promise<User> {
+export async function createUser(env: Env, email: string, clientKey: string): Promise<User> {
   const normalized = email.trim().toLowerCase();
-  const { hash, salt } = await hashPassword(password);
+  const { hash, salt } = await hashClientKey(clientKey);
   const user: User = {
     id: crypto.randomUUID(),
     email: normalized,
@@ -46,11 +46,11 @@ export async function createUser(env: Env, email: string, password: string): Pro
 /** 16 zero bytes, base64 — see verifyLogin. */
 const DUMMY_SALT = "AAAAAAAAAAAAAAAAAAAAAA==";
 
-export async function verifyLogin(env: Env, email: string, password: string): Promise<User | null> {
+export async function verifyLogin(env: Env, email: string, clientKey: string): Promise<User | null> {
   const user = await findUserByEmail(env, email);
-  // Derive even when the account doesn't exist, so an unknown email costs the
-  // same time as a wrong password and can't be told apart from one.
-  const { hash } = await hashPassword(password, user?.salt ?? DUMMY_SALT);
+  // Hash even when the account does not exist, so an unknown email costs the
+  // same time as a wrong password and cannot be told apart from one.
+  const { hash } = await hashClientKey(clientKey, user?.salt ?? DUMMY_SALT);
   if (!user) return null;
   return safeEqual(hash, user.passwordHash) ? user : null;
 }

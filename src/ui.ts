@@ -284,6 +284,63 @@ function layout(o: LayoutOpts): string {
 </html>`;
 }
 
+/**
+ * Stretches the password in the browser and submits only the derived key, so
+ * the Worker never spends CPU on PBKDF2 — it stays inside the 10ms Workers Free
+ * budget while the work factor stays high. The real password never leaves the
+ * page. Iteration count must match CLIENT_PBKDF2_ITERATIONS in crypto.ts.
+ */
+const AUTH_SCRIPT = `
+<script>
+(function () {
+  var ITERATIONS = 600000;
+  var form = document.getElementById("authForm");
+  if (!form || !window.crypto || !window.crypto.subtle) return;
+
+  var note = document.getElementById("jsNote");
+  if (note) note.remove();
+
+  form.addEventListener("submit", function (ev) {
+    if (form.dataset.ready === "1") return;
+    ev.preventDefault();
+
+    var email = form.email.value.trim().toLowerCase();
+    var password = form.password.value;
+    var button = form.querySelector("button[type=submit]");
+    var label = button.textContent;
+    button.disabled = true;
+    button.textContent = "Securing\\u2026";
+
+    var enc = new TextEncoder();
+    crypto.subtle.digest("SHA-256", enc.encode("jobmatcher:" + email))
+      .then(function (salt) {
+        return crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveBits"])
+          .then(function (key) {
+            return crypto.subtle.deriveBits(
+              { name: "PBKDF2", salt: new Uint8Array(salt), iterations: ITERATIONS, hash: "SHA-256" },
+              key, 256
+            );
+          });
+      })
+      .then(function (bits) {
+        var bytes = new Uint8Array(bits), s = "";
+        for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+        form.derivedKey.value = btoa(s);
+        // Never transmit the password itself.
+        form.password.value = "";
+        form.password.removeAttribute("name");
+        form.dataset.ready = "1";
+        form.submit();
+      })
+      .catch(function () {
+        button.disabled = false;
+        button.textContent = label;
+        alert("Could not secure your password in this browser. Please try a different one.");
+      });
+  });
+})();
+</script>`;
+
 function authShell(title: string, inner: string): string {
   return `<!doctype html>
 <html lang="en">
@@ -300,6 +357,7 @@ function authShell(title: string, inner: string): string {
       ${inner}
     </div>
   </div>
+  ${AUTH_SCRIPT}
 </body>
 </html>`;
 }
@@ -312,7 +370,10 @@ export function renderLogin(opts: { error?: string; notice?: string; email?: str
       <p class="sub">Sign in to your job matcher</p>
       ${opts.notice ? `<div class="msg ok">${esc(opts.notice)}</div>` : ""}
       ${opts.error ? `<div class="msg err">${esc(opts.error)}</div>` : ""}
-      <form method="POST" action="/login">
+      <noscript><div class="msg err" id="jsNoteStatic">JavaScript is required to sign in.</div></noscript>
+      <div class="msg err" id="jsNote">JavaScript is required to sign in.</div>
+      <form method="POST" action="/login" id="authForm">
+        <input type="hidden" name="derivedKey" value="">
         <label>Email
           <input type="email" name="email" value="${esc(opts.email || "")}" required autofocus autocomplete="username">
         </label>
@@ -332,7 +393,10 @@ export function renderSignup(opts: { error?: string; email?: string } = {}): str
       <h1>Create your account</h1>
       <p class="sub">You need an invite code from whoever runs this instance</p>
       ${opts.error ? `<div class="msg err">${esc(opts.error)}</div>` : ""}
-      <form method="POST" action="/signup">
+      <noscript><div class="msg err" id="jsNoteStatic">JavaScript is required to register.</div></noscript>
+      <div class="msg err" id="jsNote">JavaScript is required to register.</div>
+      <form method="POST" action="/signup" id="authForm">
+        <input type="hidden" name="derivedKey" value="">
         <label>Email
           <input type="email" name="email" value="${esc(opts.email || "")}" required autofocus autocomplete="username">
         </label>

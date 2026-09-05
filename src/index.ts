@@ -37,6 +37,9 @@ import {
   renderSignup,
 } from "./ui";
 
+/** Passwords are stretched in the browser, so a JS-less client cannot sign in. */
+const JS_REQUIRED = "JavaScript must be enabled to sign in — passwords are secured in your browser before being sent.";
+
 /** Total attachment bytes per email, before base64 expansion. */
 const MAX_ATTACHMENT_TOTAL = 10 * 1024 * 1024;
 
@@ -148,8 +151,11 @@ export default {
       if (req.method === "POST") {
         const form = await req.formData();
         const email = String(form.get("email") || "");
-        const password = String(form.get("password") || "");
-        const user = await verifyLogin(env, email, password);
+        const derivedKey = String(form.get("derivedKey") || "");
+        if (!derivedKey) {
+          return html(renderLogin({ error: JS_REQUIRED, email }), 400);
+        }
+        const user = await verifyLogin(env, email, derivedKey);
         if (!user) {
           return html(renderLogin({ error: "Wrong email or password.", email }), 401);
         }
@@ -166,20 +172,20 @@ export default {
       if (req.method === "POST") {
         const form = await req.formData();
         const email = String(form.get("email") || "").trim();
-        const password = String(form.get("password") || "");
+        const derivedKey = String(form.get("derivedKey") || "");
         const invite = String(form.get("inviteCode") || "");
 
         if (!env.INVITE_CODE || !safeEqual(invite, env.INVITE_CODE)) {
           return html(renderSignup({ error: "That invite code isn't valid.", email }), 403);
         }
-        if (password.length < 8) {
-          return html(renderSignup({ error: "Password must be at least 8 characters.", email }), 400);
+        if (!derivedKey) {
+          return html(renderSignup({ error: JS_REQUIRED, email }), 400);
         }
         if (await findUserByEmail(env, email)) {
           return html(renderSignup({ error: "That email is already registered.", email }), 409);
         }
 
-        const user = await createUser(env, email, password);
+        const user = await createUser(env, email, derivedKey);
         const adopted = await claimLegacyData(env, user.id);
         const token = await createSession(env, user.id);
         return redirectTo(

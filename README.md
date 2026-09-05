@@ -7,7 +7,8 @@ sent from **their own** mail account, not the instance owner's.
 ## How it works
 
 - **Accounts**: registration needs an invite code you control (`INVITE_CODE`).
-  Sessions are HttpOnly cookies; passwords are PBKDF2-SHA256 with a per-user salt.
+  Sessions are HttpOnly cookies; passwords are stretched in the browser with
+  PBKDF2 (600k) so the Worker never spends CPU on them.
 - **Job data**: uses the [JSearch API](https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch)
   on RapidAPI, which aggregates listings from LinkedIn, Indeed, Glassdoor, and
   others. This avoids scraping LinkedIn directly, which violates their Terms of
@@ -169,9 +170,14 @@ location to be effectively mandatory, set `minScore` above 80.
 
 - Mail app passwords are AES-GCM encrypted with `ENCRYPTION_KEY` before being
   written to KV, and the settings page never renders them back.
-- Account passwords are PBKDF2-SHA256 (100k iterations) with a per-user salt.
-  That costs CPU on every login — on the **Workers Free plan (10ms CPU/request)**
-  you may need to lower `PBKDF2_ITERATIONS` in [src/crypto.ts](src/crypto.ts).
+- Account passwords are stretched **in the browser** — PBKDF2-SHA256 at 600,000
+  iterations — and only the derived key is sent. The Worker stores a single
+  salted SHA-256 of that key. This keeps a high work factor while costing the
+  Worker almost no CPU, which is what makes the app viable on the **Workers Free
+  plan (10ms CPU per request)**; server-side PBKDF2 at 100k iterations takes
+  ~75ms and fails there with Error 1102.
+  Consequence: **JavaScript is required to sign in or register**, and the 8-character
+  minimum is enforced client-side only, since the server never sees the password.
 - Login derives a hash even for unknown emails, so response timing doesn't
   reveal which accounts exist.
 - Users can only ever read their own KV namespace; there is no admin view and

@@ -9,10 +9,13 @@ const enc = new TextEncoder();
 const dec = new TextDecoder();
 
 /**
- * PBKDF2 cost. Higher is better, but this burns Worker CPU time on every login
- * — on the Workers Free plan (10ms CPU per request) you may need to lower it.
+ * Iterations the BROWSER runs before sending anything. The Worker never does
+ * this work, so the cost lands on the visitor's machine (~0.5s once per login)
+ * instead of the 10ms CPU budget a Workers Free request gets.
+ *
+ * Must stay in sync with the same constant in the login/signup page script.
  */
-const PBKDF2_ITERATIONS = 100_000;
+export const CLIENT_PBKDF2_ITERATIONS = 600_000;
 
 function toBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -57,21 +60,27 @@ export async function decryptSecret(masterSecret: string, payload: string): Prom
   return dec.decode(plain);
 }
 
-/** Derives a password hash. Pass an existing salt to verify, omit it to enrol. */
-export async function hashPassword(
-  password: string,
+/**
+ * Hashes the key the browser already derived, with a random per-user salt.
+ *
+ * This is a single SHA-256 — deliberately cheap, because the expensive
+ * stretching already happened client-side. The salt still matters: it stops a
+ * stolen KV dump from being replayed straight back as a login, and stops one
+ * leaked record from revealing that two users share a password.
+ *
+ * Pass an existing salt to verify, omit it to enrol.
+ */
+export async function hashClientKey(
+  clientKey: string,
   existingSalt?: string
 ): Promise<{ hash: string; salt: string }> {
   const salt = existingSalt ? fromBase64(existingSalt) : crypto.getRandomValues(new Uint8Array(16));
-  const material = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, [
-    "deriveBits",
-  ]);
-  const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt, iterations: PBKDF2_ITERATIONS, hash: "SHA-256" },
-    material,
-    256
-  );
-  return { hash: toBase64(new Uint8Array(bits)), salt: toBase64(salt) };
+  const keyBytes = enc.encode(clientKey);
+  const input = new Uint8Array(salt.length + keyBytes.length);
+  input.set(salt);
+  input.set(keyBytes, salt.length);
+  const digest = await crypto.subtle.digest("SHA-256", input);
+  return { hash: toBase64(new Uint8Array(digest)), salt: toBase64(salt) };
 }
 
 /** Constant-time compare, so a wrong hash can't be narrowed down by timing. */

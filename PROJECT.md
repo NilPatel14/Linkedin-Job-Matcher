@@ -147,7 +147,7 @@ There is no native app and none is needed.
 
 | Area | What it does |
 | --- | --- |
-| **Accounts** | Invite-code registration, PBKDF2-SHA256 passwords, HttpOnly cookie sessions |
+| **Accounts** | Invite-code registration, browser-side PBKDF2 (600k), HttpOnly cookie sessions |
 | **Search** | Daily cron per user, plus on-demand "Run search" |
 | **Matching** | 0–100 score: title (40) + skills (up to 40) + location (20); exclusions zero it out |
 | **Deduplication** | A job you've been told about is never sent twice (30-day memory) |
@@ -171,7 +171,7 @@ There is no native app and none is needed.
 | `smtp.ts` | 135 | SMTP client over raw TCP |
 | `mime.ts` | 115 | RFC 5322/2045 message construction |
 | `auth.ts` | 99 | Users, sessions, cookies, key namespacing |
-| `crypto.ts` | 90 | PBKDF2 hashing, AES-GCM encryption |
+| `crypto.ts` | 95 | Credential hashing, AES-GCM encryption |
 | `match.ts` | 69 | Scoring |
 | `settings.ts` | 61 | Per-user SMTP settings |
 | `profile.ts` · `jobsearch.ts` | 60 each | Profile storage · JSearch queries |
@@ -201,7 +201,10 @@ u:<uuid>:seen:<jobId>    → dedup marker          (30-day TTL)
 
 ## Security model
 
-- **Account passwords**: PBKDF2-SHA256, 100k iterations, per-user random salt.
+- **Account passwords**: stretched in the BROWSER with PBKDF2-SHA256 at 600,000
+  iterations; only the derived key is transmitted. The Worker stores a salted
+  SHA-256 of it, costing near-zero CPU (what keeps the app on the Workers Free
+  plan). Requires JavaScript to sign in.
 - **Login timing**: a hash is derived even for unknown emails, so response time
   doesn't reveal which accounts exist.
 - **Mail passwords**: AES-GCM encrypted under a master `ENCRYPTION_KEY` before
@@ -243,9 +246,9 @@ Roughly **six active users on one title each**. Cloudflare's free tier
   the user supplies the recipient by hand. This is the one genuinely manual step.
 - **Cloudflare-only.** The TCP-socket SMTP client doesn't port to other runtimes.
 - **No password reset.** A locked-out user needs the operator to intervene.
-- **PBKDF2 cost vs. Workers Free.** 100k iterations may exceed the free plan's
-  10ms CPU budget per request; `PBKDF2_ITERATIONS` in `src/crypto.ts` may need
-  lowering on that plan.
+- **JavaScript required for auth.** Password stretching happens client-side to
+  stay inside the Workers Free 10ms CPU budget, so login and signup do not work
+  with JS disabled. Every other page is plain server-rendered HTML.
 - **Aggregator coverage.** Results come from JSearch's aggregation, not a direct
   feed from any single board.
 
