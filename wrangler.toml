@@ -11,7 +11,7 @@ crons = ["0 7 * * *"]
 # then paste the returned id below.
 [[kv_namespaces]]
 binding = "JOBS_KV"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "5599d2a1e7cf49bbab6364ee9c225bf0"
 
 # Secrets (never put these here) - set with `wrangler secret put <NAME>`:
 #   RAPIDAPI_KEY   - key for the JSearch API on RapidAPI. Shared by every user,
